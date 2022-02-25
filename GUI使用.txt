@@ -1,0 +1,58 @@
+main.c加入
+
+/* USER CODE BEGIN PFP */
+extern volatile GUI_TIMER_TIME OS_TimeMS;
+void HAL_SYSTICK_Callback(void)
+{
+	OS_TimeMS++;
+}
+/* USER CODE END PFP */
+
+在timer需加入
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM6) {
+    HAL_IncTick();
+    GRAPHICS_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
+
+改變按鈕圖案
+1.將檔案利用BmpCvST.exe改成C檔案
+2.加入到專案中
+3.在要使用的DLG檔案中利用extern加入
+  e.g extern GUI_CONST_STORAGE GUI_BITMAP bm01;
+4.宣告: GUI_BITMAP buttonbmp_tab[12];
+5.在create(DLG名字)中加入:
+  buttonbmp_tab[0]=bm01;
+  此陣列每一個都對應到一張圖片
+6.hItem = WM_GetDialogItem(pMsg->hWin, ID_Button_0);
+  BUTTON_SetBitmapEx(hItem,0,&buttonbmp_tab[0],0,0); 
+  其中button號碼跟buttonbmp_tab[]中的數字可更改成想要的按鍵與圖片
+
+使用GUI的TIMER
+1.  宣告這兩個變數:
+    WM_HWIN hWin;
+    hWin = pMsg->hWin;
+2.在 case WM_INIT_DIALOG:中
+  WM_CreateTimer(hWin, 0, 100, 0); //每100ms呼叫一次timer
+3.增加一個新case 
+   case WM_TIMER:
+   WM_RestartTimer(pMsg->Data.v, 100);  //重新啟動timer
+   break;
+ 
+更改EDIT或TEXT
+1.	   hItem = WM_GetDialogItem(pMsg->hWin, ID_EDIT_1);
+	   EDIT_SetText(hItem, "HELLO");
+
+Reference:
+https://www.waveshare.net/study/article-663-1.html
+https://www.twblogs.net/a/5b8a26bd2b71775d1ce5b649
+https://forum.segger.com/index.php/Thread/1182-How-to-use-Timers-in-EmWin/
+https://blog.csdn.net/qq_22389643/article/details/95049124
